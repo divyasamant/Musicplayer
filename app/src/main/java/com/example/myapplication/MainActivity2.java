@@ -1,5 +1,4 @@
 package com.example.myapplication;
-
 import android.annotation.SuppressLint;
 import android.media.MediaPlayer;
 import android.os.Bundle;
@@ -13,15 +12,13 @@ import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 public class MainActivity2 extends AppCompatActivity {
-    private Handler mHandle=new Handler();
-    private Runnable runnable;
-     SeekBar sb;
-     TextView t1,t2,title;
+    SeekBar sb;
+    TextView t1,t2,title;
     MediaPlayer music;
-    Button b1;
+    Button b1,b2;
     Boolean isOn=false;
     int resID; String sname;
-    int [] song={R.raw.perfect,R.raw.alright,R.raw.moon,R.raw.passenger,R.raw.pink,};
+    int[] song;
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -31,10 +28,18 @@ public class MainActivity2 extends AppCompatActivity {
         resID=getResources().getIdentifier(sname,"raw",getPackageName());
         music = MediaPlayer.create(this,resID);
         b1=findViewById(R.id.play);
+        b2=findViewById(R.id.next);
         t1=findViewById(R.id.t1);
         t2=findViewById(R.id.t2);
         title=findViewById(R.id.title);
         title.setText(sname.toUpperCase());
+        //resource ids
+        int a=getResources().getIdentifier("perfect","raw",getPackageName());
+        int b=getResources().getIdentifier("alright","raw",getPackageName());
+        int c=getResources().getIdentifier("moon","raw",getPackageName());
+        int d=getResources().getIdentifier("passenger","raw",getPackageName());
+        int e=getResources().getIdentifier("pink","raw",getPackageName());
+        song= new int[]{a, b, c, d, e};
         //Setting song duration
         t2.setText(convertTOMSS(String.valueOf(music.getDuration())));
         sb=findViewById(R.id.sb);
@@ -69,19 +74,13 @@ public class MainActivity2 extends AppCompatActivity {
 
             }
         });
+        b2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                next(v);
+            }
+        });
 
-       }
-       private void changeSeekbar(){
-        sb.setProgress(music.getCurrentPosition());
-        if(music.isPlaying()){
-            runnable=new Runnable() {
-                @Override
-                public void run() {
-                        changeSeekbar();
-                    }
-            };
-            mHandle.postDelayed(runnable,1000);
-        }
        }
     @SuppressLint("DefaultLocale")
     //Program to convert milliseconds into minute and seconds
@@ -107,21 +106,31 @@ public class MainActivity2 extends AppCompatActivity {
        }
        //To play previous song
         public void previous(View v){
-        music.stop();
-        music = MediaPlayer.create(this, R.raw.perfect);
-        music.start();
-
+            music.stop();
+            music.reset();
+            music.release();
+            music=null;
+            for(int i=0;i<song.length;i++){
+                if(resID==song[i]){
+                    int new_song=song[i-1];
+                    String new_song_name= getResources().getResourceEntryName(song[i-1]);
+                    music = MediaPlayer.create(this,new_song);
+                    music.start();b1.setBackgroundResource(R.drawable.pause);
+                    title.setText(new_song_name.toUpperCase());
+                    resID=song[i-1];
+                }
+            }
     }
-    //To play next song
-    public void next(View v)
-    {
-       music.stop();
-       music = MediaPlayer.create(this, R.raw.moon);
-       music.start();
+    public void next(View v){
+        music.stop();
+       title.setText("Currently not working");
     }
     public void onDestroy(){
+        super.onDestroy();
+        music.stop();
+        music.reset();
         music.release();
         music=null;
-        super.onDestroy();
+
     }
 }
