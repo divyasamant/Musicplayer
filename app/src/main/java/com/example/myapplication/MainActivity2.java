@@ -123,7 +123,19 @@ public class MainActivity2 extends AppCompatActivity {
     }
     public void next(View v){
         music.stop();
-       title.setText("Currently not working");
+        music.reset();
+        music.release();
+        music=null;
+        for(int i=0;i<song.length;i++){
+            if(resID==song[i]){
+                int new_song=song[i+1];
+                String new_song_name= getResources().getResourceEntryName(song[i+1]);
+                music = MediaPlayer.create(this,new_song);
+                music.start();b1.setBackgroundResource(R.drawable.pause);
+                title.setText(new_song_name.toUpperCase());
+                resID=song[i+1];
+            }
+        }
     }
     public void onDestroy(){
         super.onDestroy();
